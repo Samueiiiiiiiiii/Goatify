@@ -14,6 +14,21 @@ CORS(app)
 TEMP_DIR = tempfile.gettempdir()
 download_progress = {}
 
+COOKIES_FILE = os.path.join(TEMP_DIR, 'yt_cookies.txt')
+
+def get_cookies_opt():
+    # Priority 1: environment variable
+    cookies_content = os.environ.get('YOUTUBE_COOKIES', '').strip()
+    if cookies_content:
+        with open(COOKIES_FILE, 'w', encoding='utf-8') as f:
+            f.write(cookies_content)
+        return {'cookiefile': COOKIES_FILE}
+    # Priority 2: local file (for local dev)
+    local = os.path.join(os.path.dirname(__file__), 'cookies.txt')
+    if os.path.exists(local):
+        return {'cookiefile': local}
+    return {}
+
 YDL_OPTS_SEARCH = {
     'format': 'bestaudio/best',
     'noplaylist': True,
@@ -25,7 +40,8 @@ YDL_OPTS_SEARCH = {
         'youtube': {
             'player_client': ['android', 'web']
         }
-    }
+    },
+    **get_cookies_opt()
 }
 
 @app.route('/api/search', methods=['GET'])
@@ -84,7 +100,8 @@ def download():
             'youtube': {
                 'player_client': ['android', 'web']
             }
-        }
+        },
+        **get_cookies_opt()
     }
 
     try:
@@ -135,7 +152,8 @@ def stream():
             'youtube': {
                 'player_client': ['android', 'web']
             }
-        }
+        },
+        **get_cookies_opt()
     }
 
     try:
