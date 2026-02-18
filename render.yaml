@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: goat-music
+    runtime: docker
+    plan: free
+    healthCheckPath: /
